@@ -30,12 +30,17 @@
 <div id="off"><div>مفيش إنترنت دلوقتي.<br>اتأكد من النت وجرّب تاني.<br><button onclick="location.reload()">جرّب تاني</button></div></div>
 <iframe id="app" title="KAYAN" allow="clipboard-read; clipboard-write; fullscreen" src="https://script.google.com/macros/s/AKfycbwH3PZVLu2gsvVfUicN-J-OsoPZoAFm8JBEznpGpKYNctbWthTHKhAqslQlcuRkOKngHQ/exec"></iframe>
 <script>
-  var app = document.getElementById('app'), splash = document.getElementById('splash');
+  var EXEC = 'https://script.google.com/macros/s/AKfycbwH3PZVLu2gsvVfUicN-J-OsoPZoAFm8JBEznpGpKYNctbWthTHKhAqslQlcuRkOKngHQ/exec';
+  var app = document.getElementById('app'), splash = document.getElementById('splash'), ready = false;
   function hide() { splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 500); }
-  app.addEventListener('load', function () { setTimeout(hide, 250); });
-  setTimeout(hide, 12000);
+  // The app says «ready» once it opened fine inside this window.
+  window.addEventListener('message', function (e) { if (e.data && e.data.kayan === 'ready') { ready = true; hide(); } });
+  // Some phones refuse to open Google pages inside another page: then open the app itself in this window.
+  function fallback() { if (!ready && navigator.onLine) location.replace(EXEC); }
+  app.addEventListener('load', function () { setTimeout(fallback, 4000); });
+  setTimeout(fallback, 25000);
   if (!navigator.onLine) document.getElementById('off').style.display = 'flex';
-  window.addEventListener('online', function () { document.getElementById('off').style.display = 'none'; });
+  window.addEventListener('online', function () { location.reload(); });
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
 </script>
 </body>
